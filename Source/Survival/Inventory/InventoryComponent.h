@@ -9,27 +9,27 @@
 * Container for items in the inventory component.
 * Holds the reference as well as slot/stack info.
 */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FInventoryItemSlotInfo
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	FName ItemID;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	int32 SlotIndex;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	int32 StackSize;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	int32 MaxStackSize;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	TSubclassOf<class UBaseItem> ItemTypeClass;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	class UBaseItem *ItemTypeReference;
 
 	bool ItemTypeClassIsValid();
@@ -81,5 +81,15 @@ public:
 
 
 	bool AddItem(const FName &ItemID, int32 NewStackSize, TSubclassOf<class UBaseItem> ItemTypeClass);
+
+	bool DropItem(int32 Slot, int32 StackSize);
+
+	int32 GetOpenSlotIndex() const;
+
+	int32 GetItemInfoIndexAtSlot(int SlotIndex) const;
+
+private:
+	
+	TArray<int32> _openSlots;
 	
 };

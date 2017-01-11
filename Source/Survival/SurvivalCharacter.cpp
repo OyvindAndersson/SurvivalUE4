@@ -239,6 +239,13 @@ void ASurvivalCharacter::HandlePickupItem(AItemWorldActor *ItemPickup)
 	if (InventoryComponent->AddItem(ItemPickup->ItemTypeReference->ID, ItemPickup->StackSize, ItemPickup->ItemTypeClass))
 	{
 		ItemPickup->Destroy(true);
+
+		for (int i = 0; i < InventoryComponent->Items.Num(); i++)
+		{
+			UE_LOG(InventorySystemLog, Warning, TEXT("Item: [%s] - Slot: %d"), 
+				*InventoryComponent->Items[i].ItemTypeReference->Name.ToString(),
+				InventoryComponent->Items[i].SlotIndex);
+		}
 	}
 	else
 	{
