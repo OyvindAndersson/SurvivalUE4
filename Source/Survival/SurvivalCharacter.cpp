@@ -230,14 +230,15 @@ void ASurvivalCharacter::LookUpAtRate(float Rate)
 
 void ASurvivalCharacter::HandlePickupItem(AItemWorldActor *ItemPickup)
 {
-	UBaseItem *Item = ItemPickup->ItemTypeReference;
 
 	UE_LOG(InventorySystemLog, Warning, TEXT("Handling pickup for item Name: ['%s'] with ID: ['%s'] - Class: '%s'"), 
-		*Item->Name.ToString(), *Item->ID.ToString(), *Item->GetClass()->GetPathName());
+		*ItemPickup->ItemTypeReference->Name.ToString(), 
+		*ItemPickup->ItemTypeReference->ID.ToString(), 
+		*ItemPickup->ItemTypeReference->GetClass()->GetPathName());
 
-	if (InventoryComponent->AddItem(Item->ID, ItemPickup->StackSize, ItemPickup->ItemTypeClass))
+	if (InventoryComponent->AddItem(ItemPickup->ItemTypeReference->ID, ItemPickup->StackSize, ItemPickup->ItemTypeClass))
 	{
-
+		ItemPickup->Destroy(true);
 	}
 	else
 	{

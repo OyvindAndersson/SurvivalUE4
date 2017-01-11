@@ -29,7 +29,16 @@ struct FInventoryItemSlotInfo
 	UPROPERTY()
 	TSubclassOf<class UBaseItem> ItemTypeClass;
 
+	UPROPERTY()
+	class UBaseItem *ItemTypeReference;
+
 	bool ItemTypeClassIsValid();
+	bool ItemTypeRefIsValid();
+
+	UBaseItem *GetItemRef()
+	{
+		return ItemTypeReference;
+	}
 
 	FInventoryItemSlotInfo()
 	{
@@ -38,6 +47,7 @@ struct FInventoryItemSlotInfo
 		StackSize = 0;
 		MaxStackSize = 0;
 		ItemTypeClass = nullptr;
+		ItemTypeReference = nullptr;
 	}
 };
 
@@ -55,9 +65,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Inventory)
 	int32 Slots;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Inventory)
-	int32 MaxSlots;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	TArray<FInventoryItemSlotInfo> Items;
 
@@ -73,6 +80,6 @@ public:
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
 
-	bool AddItem(const FName &ItemID, int32 StackSize, TSubclassOf<class UBaseItem> ItemTypeClass);
+	bool AddItem(const FName &ItemID, int32 NewStackSize, TSubclassOf<class UBaseItem> ItemTypeClass);
 	
 };

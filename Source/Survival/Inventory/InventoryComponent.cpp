@@ -12,6 +12,14 @@ bool FInventoryItemSlotInfo::ItemTypeClassIsValid()
 	return (ItemTypeClass == nullptr ? false : true);
 }
 
+bool FInventoryItemSlotInfo::ItemTypeRefIsValid()
+{
+	if (ItemTypeReference == nullptr)
+		return false;
+
+	return ItemTypeReference->IsValidLowLevel();
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // UInventoryComponent
@@ -24,6 +32,7 @@ UInventoryComponent::UInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	Slots = 8;
 }
 
 
@@ -46,18 +55,45 @@ void UInventoryComponent::TickComponent( float DeltaTime, ELevelTick TickType, F
 }
 
 
-bool UInventoryComponent::AddItem(const FName &ItemID, int32 StackSize, TSubclassOf<class UBaseItem> ItemTypeClass)
+bool UInventoryComponent::AddItem(const FName &ItemID, int32 NewStackSize, TSubclassOf<class UBaseItem> ItemTypeClass)
 {
+	int32 AvailableSlot = INDEX_NONE;
+	for (const FInventoryItemSlotInfo &SlotInfo : Items)
+	{
+		// Check if we have any items with available stack-space, and have room for the new stacksize.
+		if (SlotInfo.StackSize + NewStackSize <= SlotInfo.MaxStackSize )
+		{
+			AvailableSlot = SlotInfo.SlotIndex;
+			break;
+		}
+	}
+
+	// Are we adding to a slot, or creating a new?
+	if (AvailableSlot != INDEX_NONE)
+	{
+		// Only create a new instance of the item if we don't have one in inventory.
+		UBaseItem *NewItem = NewObject<UBaseItem>(this, ItemTypeClass);
+		if (!NewItem || !NewItem->IsValidLowLevel())
+		{
+			return false;
+		}
+	}
+	else if(Items.Num() < Slots)
+	{
+		// We have room
+	}
+	else
+	{
+		// Cant add this. No room nor stack space.
+	}
+	
+
 	FInventoryItemSlotInfo NewSlot;
 	NewSlot.ItemID = ItemID;
 	NewSlot.ItemTypeClass = ItemTypeClass;
-	NewSlot.StackSize = StackSize;
+	NewSlot.ItemTypeReference = nullptr;
+	NewSlot.StackSize = NewStackSize;
 	NewSlot.SlotIndex = 0;
-
-	for (const FInventoryItemSlotInfo &SlotInfo : Items)
-	{
-
-	}
 
 
 	return true;

@@ -53,6 +53,7 @@ void AItemWorldActor::OnConstruction(const FTransform& Transform)
 
 		// Create the item associated with this pickup actor
 		ItemTypeReference = ConstructObject<UBaseItem>(ItemTypeClass, this);
+		
 		// Set mesh to whatever is referenced in the base item def
 		StaticMesh->SetStaticMesh(ItemTypeReference->WorldMesh);
 		if (StaticMesh)
