@@ -22,6 +22,25 @@ fill up empty room in the max stack size.
 
 I.e:
 + "Mini-Health" + "Mini-Health" = "Medium-Health"
-+ "9mm Ammo" + "9mm Ammo" = First "9mm Ammo" is filled up with whatever it can take from the second Ammo. If its full, nothing happens.
++ "9mm Ammo" + "9mm Ammo" = First "9mm Ammo" stack size takes what it can from the second "9mm Ammo"'s stack size.
+
+Valid combinations are defined by ``` class UItemCraftRecipe ``` which has its own object factory in the editor (Create new asset -> Misc -> Item Craft Recipe)
+These are loaded on game init and searched whenever a combination of items in the inventory UI are signaled.
+If the items can be combined, they will be removed and replaced with the "yield" item, or in case of stackable combination,
+the stacksizes of the respective items will be updated.
 
 ## Weapon system
+
+Weapons need a specific ammo type to be loaded. Thus the player must find ammunition for the respective weapon
+to load and fire. Each firearm has a max clip-size that will take from available ammo items, decreasing their stack size.
+Weapons that do not need ammunition have a clip-size of 0 and can be "fired" infinetly.
+
+Standard weaponry:
++ Pistols
++ Shotguns
++ Rifles
++ Grenades
++ Bludgeons (Axe, knife)
+
+Handheld utilities (Equipped same as weapons)
++ Flashlight (Seconhand equip : Can be used alongside with weapons)
