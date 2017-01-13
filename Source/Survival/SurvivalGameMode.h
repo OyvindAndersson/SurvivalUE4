@@ -10,6 +10,14 @@ class ASurvivalGameMode : public AGameModeBase
 
 public:
 	ASurvivalGameMode();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory System Manager")
+	class UInventorySystemManager *InventorySystemManager;
+
+
+public:
+
+	virtual void InitGame(const FString & MapName, const FString & Options, FString & ErrorMessage) override;
 };
 
 

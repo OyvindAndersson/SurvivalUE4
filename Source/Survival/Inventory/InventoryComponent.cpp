@@ -136,7 +136,7 @@ bool UInventoryComponent::DropItem(int32 Slot, int32 StackSize)
 	
 }
 
-
+// Called to resize the inventory
 bool UInventoryComponent::ResizeInventory(int32 NewRows, int32 NewColumns)
 {
 	if (NewRows * NewColumns < Items.Num())
