@@ -6,11 +6,16 @@
 
 UBaseItem::UBaseItem()
 {
-	WorldMesh = NULL;
-	Icon = NULL;
-	MaxStackSize = 0;
-	Value = 0;
 	ID = FName("NO_ID");
 	Name = FText();
+
+	WorldMesh = nullptr;
+	DetailMesh = nullptr;
+	Icon = nullptr;
+
+	MaxStackSize = 0;
+	Value = 0;
+
+	ItemType = EItemType::IT_Item;
 }
 

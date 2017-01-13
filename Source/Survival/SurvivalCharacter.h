@@ -1,6 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/Character.h"
+#include "Inventory/InventoryComponent.h"
 #include "SurvivalCharacter.generated.h"
 
 class UInputComponent;
@@ -26,14 +27,14 @@ class ASurvivalCharacter : public ACharacter
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
-	class UInventoryComponent *InventoryComponent;
 		
 public:
 	ASurvivalCharacter();
 
 	virtual void BeginPlay();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
+	class UInventoryComponent *InventoryComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay)
 	float ActionTraceDistance;
@@ -61,6 +62,10 @@ public:
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	class UAnimMontage* FireAnimation;
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
+	void ItemSlotAdded(const FItemSlotInfo &NewItem);
 
 protected:
 	

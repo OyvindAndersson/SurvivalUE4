@@ -4,7 +4,9 @@
 #include "SurvivalCharacter.h"
 #include "SurvivalProjectile.h"
 #include "Inventory/BaseItem.h"
-#include "Inventory/InventoryComponent.h"
+#include "Inventory/BaseWeaponItem.h"
+#include "Inventory/ProjectileWeapon.h"
+
 #include "Inventory/ItemWorldActor.h"
 #include "Utility/UtilityFunctionsLibrary.h"
 #include "Animation/AnimInstance.h"
@@ -55,6 +57,7 @@ ASurvivalCharacter::ASurvivalCharacter()
 
 	// Create inventory component
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	//InventoryComponent->OnItemSlotAddedDelegate
 
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
@@ -236,20 +239,60 @@ void ASurvivalCharacter::HandlePickupItem(AItemWorldActor *ItemPickup)
 		*ItemPickup->ItemTypeReference->ID.ToString(), 
 		*ItemPickup->ItemTypeReference->GetClass()->GetPathName());
 
-	if (InventoryComponent->AddItem(ItemPickup->ItemTypeReference->ID, ItemPickup->StackSize, ItemPickup->ItemTypeClass))
+	if (InventoryComponent->AddItem(
+		ItemPickup->ItemTypeReference->ID, 
+		ItemPickup->StackSize, 
+		ItemPickup->ItemTypeReference->GetItemType(), 
+		ItemPickup->ItemTypeClass))
 	{
 		ItemPickup->Destroy(true);
 
+		// DEBUG print inventory
 		for (int i = 0; i < InventoryComponent->Items.Num(); i++)
 		{
-			UE_LOG(InventorySystemLog, Warning, TEXT("Item: [%s] - Slot: %d"), 
-				*InventoryComponent->Items[i].ItemTypeReference->Name.ToString(),
-				InventoryComponent->Items[i].SlotIndex);
+			const FItemSlotInfo *ItemSlot = &InventoryComponent->Items[i];
+
+			if (ItemSlot->ItemTypeReference->GetItemType() == EItemType::IT_Item)
+			{
+				UE_LOG(InventorySystemLog, Warning, TEXT("Item: [%s] - Slot: %d | Stack: [%d] | MaxStack: [%d] | Class: [%s]"),
+					*ItemSlot->ItemTypeReference->Name.ToString(),
+					ItemSlot->SlotIndex,
+					ItemSlot->StackSize,
+					ItemSlot->MaxStackSize,
+					*ItemSlot->ItemTypeClass->GetSuperClass()->GetName());
+			}
+			else
+			{
+				FString type = FString(TEXT("Base Weapon"));
+				UBaseWeaponItem *Wep = Cast<UBaseWeaponItem>(ItemSlot->ItemTypeReference);
+				if(Wep && Wep->IsValidLowLevel())
+				{
+					if (Wep->WeaponType == EWeaponType::WT_Projectile)
+					{
+						type = FString(TEXT("WT_Projectile"));
+					}
+					else if( Wep->WeaponType == EWeaponType::WT_Bludgeon)
+					{
+						type = FString(TEXT("WT_Bludgeon"));
+					}
+				}
+
+				UE_LOG(InventorySystemLog, Warning, TEXT("Item: [%s] - Slot: %d | Stack: [%d] | MaxStack: [%d] | Clip: [%d] | MaxClip: [%d] | Type: [%s] | Class: [%s]"),
+					*ItemSlot->ItemTypeReference->Name.ToString(),
+					ItemSlot->SlotIndex,
+					ItemSlot->StackSize,
+					ItemSlot->MaxStackSize,
+					Wep->ClipSize,
+					Wep->MaxClipSize,
+					*type,
+					*ItemSlot->ItemTypeClass->GetSuperClass()->GetName());
+			}
+			
 		}
 	}
 	else
 	{
-
+		UE_LOG(InventorySystemLog, Error, TEXT("Failed to add item to inventory."));
 	}
 
 	// TODO: Make ready item and add to inventory, serverside.
