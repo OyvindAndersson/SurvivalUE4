@@ -177,6 +177,9 @@ public:
 		return Items.Num() == Slots;
 	}
 
+	// Utility to resize the inventory slot count
+	bool ResizeInventory(int32 NewRows, int32 NewColumns);
+
 private:
 	
 	TArray<int32> _openSlots;

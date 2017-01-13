@@ -135,3 +135,60 @@ bool UInventoryComponent::DropItem(int32 Slot, int32 StackSize)
 	return false;
 	
 }
+
+
+bool UInventoryComponent::ResizeInventory(int32 NewRows, int32 NewColumns)
+{
+	if (NewRows * NewColumns < Items.Num())
+	{
+		// We can't discard items that occupy slots
+		UE_LOG(InventorySystemLog, Warning, TEXT("Can't downsize inventory; slots beyond new size are occupied."));
+		return false;
+	}
+	int32 oldSlotCount = Slots;
+	// Resize slots
+	Rows = NewRows;
+	Columns = NewColumns;
+	Slots = Rows * Columns;
+
+	// TODO: Go through _openSlots and make sure
+	// we only open new slots from the resize
+	TArray<int32> OccupiedSlots;
+	for (const FItemSlotInfo &SlotInfo : Items)
+	{
+		OccupiedSlots.Add(SlotInfo.SlotIndex);
+	}
+	OccupiedSlots.Sort();
+
+	// If we're just adding new slots we can start at the end
+	if (Slots > oldSlotCount)
+	{
+		for (int i = oldSlotCount; i < Slots; i++)
+		{
+			_openSlots.AddUnique(i);
+		}
+		return true;
+	}
+	else
+	{
+		// We are downsizing, simply open all slots and set items to
+		// new slots in the order they were
+		_openSlots.Empty();
+		for (int i = 0; i < Slots; i++)
+		{
+			_openSlots.Add(i);
+		}
+		// Sort by slotindex to get the same order in the inventory
+		Items.Sort([](const FItemSlotInfo &SlotA, const FItemSlotInfo &SlotB) {
+			return SlotA.SlotIndex < SlotB.SlotIndex;
+		});
+		// Occupy the slots necessary and remove the occupied slot.
+		for (int i = 0; i < Items.Num(); i++)
+		{
+			Items[i].SlotIndex = _openSlots[i];
+			_openSlots.RemoveAt(i);
+		}
+
+		return true;
+	}
+}
