@@ -7,5 +7,6 @@
 UBaseWeaponItem::UBaseWeaponItem()
 {
 	ItemType = EItemType::IT_Weapon;
+	AmmoType = EAmmoType::AT_Other;
 }
 

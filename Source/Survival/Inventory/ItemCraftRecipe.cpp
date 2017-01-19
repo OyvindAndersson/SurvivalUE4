@@ -21,4 +21,11 @@ UObject* UItemCraftRecipeFactory::FactoryCreateNew(UClass* Class, UObject* InPar
 	return NewObjectAsset;
 }
 
+/////////////////////////////////////////////////////
+// UItemCraftRecipe
+
+UItemCraftRecipe::UItemCraftRecipe()
+{
+
+}
 

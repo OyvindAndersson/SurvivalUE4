@@ -4,6 +4,10 @@
 #include "Inventory/InventoryComponent.h"
 #include "SurvivalCharacter.generated.h"
 
+
+//////////////////////////////////////////////////////////////////////
+// ASurvivalCharacter - The games' playable pawn
+
 class UInputComponent;
 class AItemWorldActor;
 
@@ -32,6 +36,8 @@ public:
 	ASurvivalCharacter();
 
 	virtual void BeginPlay();
+
+	virtual void Tick(float Delta) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent *InventoryComponent;
@@ -64,8 +70,50 @@ public:
 	class UAnimMontage* FireAnimation;
 
 public:
+	///////////////////////////////////////////////////////////
+	// Player stats
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+	float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float Stamina;
+
+
+public:
 	UFUNCTION(BlueprintImplementableEvent, Category = Inventory)
 	void ItemSlotAdded(const FItemSlotInfo &NewItem);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool CraftItems(int32 SlotA, int32 SlotB);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool DropItem(int32 Slot, int32 StackSize);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool DropItemSlot(int32 Slot);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool SwapItemSlots(int32 SlotA, int32 SlotB);
+
+	// Interaction
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool UseItem(int32 Slot);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void Equip(int32 Slot);
+
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void UnEquip();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Inventory)
+	float TakeHeal(float HealAmount, class UBaseHealingItem *HealCauser);
+
+	void HandleEquipWeapon(class UBaseWeaponItem *WeaponItem);
 
 protected:
 	
@@ -74,6 +122,15 @@ protected:
 
 	/** Performs an appropriate action (pick up item, open door, etc.) */
 	void OnAction();
+
+	/** Opens the inventory UI */
+	void OnShowInventory();
+
+	void OnStartReload();
+	void OnEndReload();
+	bool bIsReloading;
+	float ReloadTime;
+	float ReloadTimeAccum;
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
@@ -95,12 +152,12 @@ protected:
 
 	/** Handles picking up an item from the world and puts it in inventory */
 	void HandlePickupItem(AItemWorldActor *ItemPickup);
-	// void HandlePickupWeapon(UBaseWeaponItem *WeaponItem);
 
 	
 protected:
-	// APawn interface
+	// APawn / AActor interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser) override;
 	// End of APawn interface
 
 public:

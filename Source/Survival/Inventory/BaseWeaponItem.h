@@ -24,4 +24,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseWeapon)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = BaseWeapon)
+	EAmmoType AmmoType;
 };

@@ -4,6 +4,7 @@
 
 #include "UObject/NoExportTypes.h"
 #include "UnrealEd.h"
+#include "BaseItem.h"
 #include "ItemCraftRecipe.generated.h"
 
 USTRUCT(BlueprintType)
@@ -39,6 +40,8 @@ class SURVIVAL_API UItemCraftRecipe : public UObject
 	
 public:
 
+	UItemCraftRecipe();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Craft Recipe")
 	FName ItemAID;
 
@@ -46,10 +49,16 @@ public:
 	FName ItemBID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Craft Recipe")
+	FName YieldItemID;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Craft Recipe")
 	int32 YieldStackSize;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Craft Recipe")
 	TSubclassOf<class UBaseItem> YieldTypeClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Craft Recipe")
+	EItemType YieldItemType;
 
 	// Does a quick check if items with AID and BID can be crafted here
 	FORCEINLINE bool CanCraftFrom(const FName &CandidateAID, const FName &CandidateBID)

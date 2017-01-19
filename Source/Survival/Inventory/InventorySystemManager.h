@@ -29,7 +29,7 @@ struct FCraftedItemInfo
 	}
 };
 
-static FCraftedItemInfo InvalidType;
+static FCraftedItemInfo InvalidCraftedItemInfo;
 
 /**
  * 
@@ -57,5 +57,7 @@ public:
 	void PrintAssets();
 
 	// Create iteminfo for a crafted item that can be used to create the actual item object
-	const FCraftedItemInfo CraftItem(const FName &ItemAID, const FName &ItemBID);
+	//const FCraftedItemInfo CraftItem(const FName &ItemAID, const FName &ItemBID);
+
+	const UItemCraftRecipe *CraftItem(const FName &ItemAID, const FName &ItemBID);
 };

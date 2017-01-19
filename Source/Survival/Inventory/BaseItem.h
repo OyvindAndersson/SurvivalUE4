@@ -3,18 +3,20 @@
 #pragma once
 
 #include "UObject/NoExportTypes.h"
+#include "Decorators/UsableInterface.h"
 #include "BaseItem.generated.h"
 
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	IT_Item			UMETA(DisplayName = "9mm Pistol"),
-	IT_Weapon		UMETA(DisplayName = "Rifle")
+	IT_Item			UMETA(DisplayName = "Item"),
+	IT_Weapon		UMETA(DisplayName = "Weapon")
 };
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
 {
+	AT_Other		UMETA(DisplayName = "Other"),
 	AT_Pistol		UMETA(DisplayName = "9mm Pistol"),
 	AT_Rifle		UMETA(DisplayName = "Rifle"),
 	AT_Shotgun		UMETA(DisplayName = "Shotgun")
@@ -24,7 +26,8 @@ UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	WT_Projectile		UMETA(DisplayName = "Firearm"),
-	WT_Bludgeon			UMETA(DisplayName = "Bludgeon")
+	WT_Bludgeon			UMETA(DisplayName = "Bludgeon"),
+	WT_Other			UMETA(DisplayName = "Other")
 };
 
 /**
@@ -60,6 +63,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseItem)
 	class UTexture2D *Icon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = BaseItem)
+	bool CanDrop;
 
 	FORCEINLINE EItemType GetItemType()
 	{

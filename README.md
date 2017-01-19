@@ -29,6 +29,14 @@ These are loaded on game init and searched whenever a combination of items in th
 If the items can be combined, they will be removed and replaced with the "yield" item, or in case of stackable combination,
 the stacksizes of the respective items will be updated.
 
+## Status Ailment System
+The player can be inflicted with status ailments that are either positive or negative.
+Let's take two black/white examples:
++ Poison: Gradually decreases the player health, and add onscreen effects / other stat changes.
++ Adrenaline: Increases player speed, damage is less effective on player etc.
+
+### Base classes
+
 ## Weapon system
 
 Weapons need a specific ammo type to be loaded. Thus the player must find ammunition for the respective weapon

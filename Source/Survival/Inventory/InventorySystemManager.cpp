@@ -51,8 +51,30 @@ void UInventorySystemManager::LoadAllRecipeAssets()
 	CraftRecipeLibrary->LoadAssetsFromAssetData(); // Fully load
 
 	LoadedCraftRecipes = CraftRecipeLibrary->GetAssetDataCount();
+
+	// Load all recipe instances.
+
+	TArray<FAssetData> AssetDatas;
+	CraftRecipeLibrary->GetAssetDataList(AssetDatas);
+	for (int i = 0; i < AssetDatas.Num(); i++)
+	{
+		FAssetData &AssetData = AssetDatas[i];
+
+		UItemCraftRecipe *Recipe = Cast<UItemCraftRecipe>(AssetData.GetAsset());
+		if (Recipe)
+		{
+			UBaseItem *Temp = NewObject<UBaseItem>(this, Recipe->YieldTypeClass);
+			if (Temp && Temp->IsValidLowLevel())
+			{
+				Recipe->YieldItemID = Temp->ID;
+				Temp->MarkPendingKill();
+			}
+			CraftRecipes.AddUnique(Recipe);
+		}
+	}
 }
 
+/*
 const FCraftedItemInfo UInventorySystemManager::CraftItem(const FName &ItemAID, const FName &ItemBID)
 {
 	
@@ -71,5 +93,24 @@ const FCraftedItemInfo UInventorySystemManager::CraftItem(const FName &ItemAID, 
 		}
 	}
 
-	return InvalidType;
+	return InvalidCraftedItemInfo;
+}*/
+
+const UItemCraftRecipe *UInventorySystemManager::CraftItem(const FName &ItemAID, const FName &ItemBID)
+{
+	// Go through our recipes and see if we can craft anything out of these
+	UItemCraftRecipe *CurRecipe = NULL;
+	for (int i = 0; i < CraftRecipes.Num(); i++)
+	{
+		CurRecipe = CraftRecipes[i];
+		if (!CurRecipe || !CurRecipe->IsValidLowLevel())
+			continue;
+
+		if (CurRecipe->CanCraftFrom(ItemAID, ItemBID))
+		{
+			return CurRecipe;
+		}
+	}
+
+	return nullptr;
 }

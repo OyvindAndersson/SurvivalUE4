@@ -17,5 +17,6 @@ UBaseItem::UBaseItem()
 	Value = 0;
 
 	ItemType = EItemType::IT_Item;
+	CanDrop = true;
 }
 

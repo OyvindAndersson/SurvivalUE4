@@ -43,7 +43,7 @@ struct FItemSlotInfo
 
 	FItemSlotInfo()
 	{
-		ItemID = FName();
+		ItemID = FName(TEXT("INVALID"));
 		SlotIndex = INDEX_NONE;
 		StackSize = 0;
 		MaxStackSize = 0;
@@ -61,6 +61,8 @@ struct FItemSlotInfo
 		this->ItemTypeClass = ItemTypeClass;
 		this->ItemTypeReference = ItemTypeReference;
 	}
+
+	static const FItemSlotInfo InvalidSlot;
 };
 
 
@@ -95,6 +97,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	TArray<FItemSlotInfo> Items;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
+	class UBaseWeaponItem *EquippedWeapon;
 
 public:	
 	// Sets default values for this component's properties
@@ -109,6 +113,9 @@ public:
 	///////////////////////////////////////////////////////////////
 	// Events
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory Events")
+	void DroppedCraftItems(int32 SlotA, int32 SlotB);
+
 	UPROPERTY(BlueprintAssignable, Category = "Inventory Events")
 	FItemSlotAddedSignature OnItemSlotAddedDelegate;
 
@@ -117,9 +124,29 @@ public:
 
 	// Adds a regular item to the inventory or to the stack of a similar item
 	bool AddItem(const FName &ItemID, int32 NewStackSize, EItemType ItemType, TSubclassOf<class UBaseItem> ItemTypeClass);
+	bool AddItemToSlot(int32 SlotIndex, const FName &ItemID, int32 NewStackSize, EItemType ItemType, TSubclassOf<class UBaseItem> ItemTypeClass);
+
+	// Use an item
+	bool UseItem(int32 Slot, class ASurvivalCharacter *Target);
+
+	// Equips an item
+	void EquipItem(int32 Slot, class ASurvivalCharacter *Target);
+
+	// Tries to find a specific ammo type in the inventory. Useful for live-reload
+	int32 FindAmmoItemInSlot(EAmmoType AmmoType);
+
+	bool ReloadEquippedWeapon();
 
 	// Drop an item or the stacksize of an item
 	bool DropItem(int32 Slot, int32 StackSize);
+
+	// Craft an item out of two others, if a recipe matches
+	bool CraftItem(int32 SlotA, int32 SlotB, class UInventorySystemManager *InventorySystemManager);
+
+	// Swap places in the inventory
+	bool SwapSlot(int32 SlotA, int32 SlotB);
+
+	void HandleItemUsed(FItemSlotInfo &UsedItemSlot, bool WasUsed);
 
 	// Utility to set a new info in a slot. Important step includes closing the slot index, which is vital
 	FORCEINLINE void SetInSlot(const FItemSlotInfo &SlotInfo)
@@ -142,12 +169,40 @@ public:
 		return _openSlots[0]; // Return the first available slot
 	}
 
+	// Utility check if a slot index is valid or not
+	FORCEINLINE bool IsValidSlot(int32 Slot)
+	{
+		return Slot <= (Slots-1);
+	}
+
 	// Utility to get the FInventoryItemSlotInfo at the specified Inventory slot index.
-	FORCEINLINE int32 GetItemInfoIndexAtSlot(int SlotIndex)
+	FORCEINLINE int32 GetItemInfoIndexAtSlot(int32 SlotIndex)
 	{
 		return Items.IndexOfByPredicate([SlotIndex](const FItemSlotInfo &SlotInfo) {
 			return SlotInfo.SlotIndex == SlotIndex;
 		});
+	}
+
+	FORCEINLINE FItemSlotInfo *GetItemInSlot(int32 Slot)
+	{
+		int32 index = GetItemInfoIndexAtSlot(Slot);
+		if (!Items.IsValidIndex(index))
+		{
+			return nullptr;
+		}
+		return &Items[index];
+
+	}
+
+	FORCEINLINE bool IsValidSlotInfo(const FItemSlotInfo &SlotInfo)
+	{
+		return SlotInfo.SlotIndex != INDEX_NONE;
+	}
+
+	// Utility to check if the slotindex is open
+	FORCEINLINE bool IsSlotOpen(int32 SlotIndex)
+	{
+		return _openSlots.Contains(SlotIndex);
 	}
 
 	// Utility to get the ItemIndex of a stackable slot
@@ -175,6 +230,15 @@ public:
 	FORCEINLINE bool IsFull()
 	{
 		return Items.Num() == Slots;
+	}
+
+	FORCEINLINE void PrintInventory()
+	{
+		for (int i = 0; i < Items.Num(); i++)
+		{
+			UE_LOG(SurvivalDebugLog, Error, TEXT("Item: ['%s'] in slot ['%d']"),
+				*Items[i].ItemID.ToString(), Items[i].SlotIndex);
+		}
 	}
 
 	// Utility to resize the inventory slot count
