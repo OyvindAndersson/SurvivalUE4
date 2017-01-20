@@ -58,6 +58,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = BaseItem)
 	EItemType ItemType;
 
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	class ASurvivalCharacter *CharOwner;
+public:
+	void GivenTo(ASurvivalCharacter *NewOwner)
+	{
+		CharOwner = NewOwner;
+	}
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseItem)
 	FName ID;

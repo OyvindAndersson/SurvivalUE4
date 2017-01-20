@@ -7,7 +7,7 @@
 /**
  * 
  */
-UCLASS(DefaultToInstanced, CustomConstructor, EditInlineNew, Within=BaseWeaponActor)
+UCLASS(DefaultToInstanced, CustomConstructor, EditInlineNew, Within=BaseWeaponItem)
 class SURVIVAL_API UWeaponState : public UObject
 {
 	GENERATED_UCLASS_BODY()

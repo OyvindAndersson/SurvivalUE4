@@ -84,6 +84,10 @@ class SURVIVAL_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = Inventory)
+	class ASurvivalCharacter *CharOwner;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	int32 Slots;

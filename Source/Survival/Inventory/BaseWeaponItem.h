@@ -47,9 +47,12 @@ public:
 
 	//////////////////////////////////////////////////////////
 	// FTickableGameObject
-	virtual void Tick(float fDeltaTime) override {}
+
+	virtual void Tick(float fDeltaTime) override;
 	virtual bool IsTickable() const override { return true;  }
 	virtual TStatId GetStatId() const override { return this->GetStatID(); }
+
+	virtual void BeginPlay();
 
 
 	//////////////////////////////////////////////////////////
@@ -57,7 +60,7 @@ public:
 	
 public:
 
-	virtual void GotoState(class UWeaponState *NewState){}
+	virtual void GotoState(class UWeaponState *NewState);
 	virtual void StateChanged(){}
 
 	// 0: Inactive state

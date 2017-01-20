@@ -61,6 +61,7 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CharOwner = Cast<ASurvivalCharacter>(GetOuter());
 	// ...
 	
 }
@@ -234,11 +235,13 @@ bool UInventoryComponent::AddItem(const FName &ItemID, int32 NewStackSize, EItem
 			UE_LOG(InventorySystemLog, Error, TEXT("AddItem : Failed to create instance of UBaseItem!"));
 			return false;
 		}
+		// Give item ownership to character
+		NewItem->GivenTo(CharOwner);
 
 		// Create new item slot info
 		FItemSlotInfo newSlotInfo(ItemID, GetOpenSlotIndex(), NewStackSize, NewItem->MaxStackSize, ItemTypeClass, NewItem);
 		SetInSlot(newSlotInfo);
-
+		
 		// Broadcast the new item addition event to listeners
 		OnItemSlotAddedDelegate.Broadcast(newSlotInfo);
 
