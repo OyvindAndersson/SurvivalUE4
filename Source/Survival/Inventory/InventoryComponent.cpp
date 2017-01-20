@@ -8,7 +8,6 @@
 #include "BaseItem.h"
 #include "BaseWeaponItem.h"
 #include "Items/BaseAmmoItem.h"
-#include "ProjectileWeapon.h"
 
 //////////////////////////////////////////////////////////////////////////
 // FInventoryItemSlotInfo
@@ -78,33 +77,31 @@ void UInventoryComponent::TickComponent( float DeltaTime, ELevelTick TickType, F
 // Called when an item in the slot is used
 bool UInventoryComponent::UseItem(int32 Slot, ASurvivalCharacter *Target)
 {
-	int32 ItemIndex = GetItemInfoIndexAtSlot(Slot);
-	if (!Items.IsValidIndex(ItemIndex))
+	FItemSlotInfo *SlotInfo = GetItemInSlot(Slot);
+	if ( SlotInfo == NULL || !IsSlotValidLowLevel(*SlotInfo) )
 	{
-		UE_LOG(InventorySystemLog, Error, TEXT("UseItem : ItemIndex [%d] invalid!"), ItemIndex)
+		UE_LOG(InventorySystemLog, Error, TEXT("Not valid item in slot %d"), Slot);
 		return false;
 	}
 
-	FItemSlotInfo &SlotInfo = Items[ItemIndex];
-	if (SlotInfo.StackSize == 0 || !SlotInfo.ItemTypeRefIsValid())
-	{
-		UE_LOG(InventorySystemLog, Warning, TEXT("UseItem : Item stacksize is 0 or item type ref NULL, cannot use."));
-		return false;
-	}
-
-	UBaseItem *Item = SlotInfo.ItemTypeReference;
+	UBaseItem *Item = SlotInfo->ItemTypeReference;
 
 	// Check if this item implements the Usable interface. 
 	if (Item->GetClass()->ImplementsInterface(UUsableInterface::StaticClass()) )
 	{
 		if (IUsableInterface::Execute_OnUse(Item, Target))
 		{
-			HandleItemUsed(SlotInfo, true);
+			SlotInfo->StackSize -= 1;
+			// Not all items can be dropped if stacksize depletes
+			if (SlotInfo->StackSize <= 0 && SlotInfo->ItemTypeReference->CanDrop)
+			{
+				DropItem(SlotInfo->SlotIndex, INDEX_NONE); // Drop entire item - stack is empty
+			}
 			return true;
 		}
 		else
 		{
-			HandleItemUsed(SlotInfo, false);
+			UE_LOG(InventorySystemLog, Verbose, TEXT("HandleItemUsed[IUsableInterface::OnUse] : Item was not used!"));
 			return false;
 		}
 	}
@@ -118,21 +115,17 @@ bool UInventoryComponent::UseItem(int32 Slot, ASurvivalCharacter *Target)
 // Called when an item in the slot is being equipped
 void UInventoryComponent::EquipItem(int32 Slot, ASurvivalCharacter *Target)
 {
-	int32 ItemIndex = GetItemInfoIndexAtSlot(Slot);
-	if (!Items.IsValidIndex(ItemIndex))
+	
+	FItemSlotInfo *SlotInfo = GetItemInSlot(Slot);
+	if (SlotInfo == NULL || !IsSlotValidLowLevel(*SlotInfo))
 	{
-		UE_LOG(InventorySystemLog, Error, TEXT("EquipItem : ItemIndex [%d] invalid!"), ItemIndex);
+		UE_LOG(InventorySystemLog, Error, TEXT("Not valid item in slot %d"), Slot);
 		return;
 	}
 
-	FItemSlotInfo &SlotInfo = Items[ItemIndex];
-	if (SlotInfo.StackSize == 0 || !SlotInfo.ItemTypeRefIsValid())
-	{
-		UE_LOG(InventorySystemLog, Warning, TEXT("EquipItem : Item stacksize is 0 or item type ref NULL, cannot use."));
-		return;
-	}
+	UBaseItem *Item = SlotInfo->ItemTypeReference;
 
-	EItemType ItemType = SlotInfo.ItemTypeReference->GetItemType();
+	EItemType ItemType = Item->GetItemType();
 	if (ItemType == EItemType::IT_Item)
 	{
 		UE_LOG(SurvivalDebugLog, Warning, TEXT("EquipItem : Trying to equip item type : IT_Item. Not equipable."));
@@ -141,15 +134,24 @@ void UInventoryComponent::EquipItem(int32 Slot, ASurvivalCharacter *Target)
 	else if (ItemType == EItemType::IT_Weapon && Target != nullptr && Target->IsValidLowLevel())
 	{
 		// We have a weapon
-		UBaseWeaponItem *Weapon = Cast<UBaseWeaponItem>(SlotInfo.ItemTypeReference);
+		UBaseWeaponItem *Weapon = Cast<UBaseWeaponItem>(Item);
 		if (!Weapon || !Weapon->IsValidLowLevel())
 		{
 			UE_LOG(SurvivalDebugLog, Warning, TEXT("EquipItem : Not subclass of UBaseWeaponItem!."));
 		}
 
+		// SET EQUIPPED WEAPON
 		EquippedWeapon = Weapon;
+
+		// Handle equip on character
 		Target->HandleEquipWeapon(EquippedWeapon);
 	}
+}
+
+// Unequips the equipped item, if any
+void UInventoryComponent::UnEquipItem()
+{
+	EquippedWeapon = nullptr;
 }
 
 // Called when equipped weapon must reload
@@ -535,25 +537,5 @@ bool UInventoryComponent::ResizeInventory(int32 NewRows, int32 NewColumns)
 		}
 
 		return true;
-	}
-}
-
-// Called when an item has been used
-void UInventoryComponent::HandleItemUsed(FItemSlotInfo &UsedItemSlot, bool WasUsed)
-{
-	if (WasUsed)
-	{
-		UsedItemSlot.StackSize -= 1;
-		if (UsedItemSlot.StackSize <= 0 && UsedItemSlot.ItemTypeReference->CanDrop)
-		{
-			// Can we throw this item away?
-			DropItem(UsedItemSlot.SlotIndex, INDEX_NONE);
-			return;
-		}
-	}
-	else
-	{
-		UE_LOG(InventorySystemLog, Warning, TEXT("HandleItemUsed : Item was not used!"));
-		// TODO: Not used, fire event for UI??
 	}
 }

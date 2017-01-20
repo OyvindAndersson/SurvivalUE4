@@ -52,3 +52,26 @@ Standard weaponry:
 
 Handheld utilities (Equipped same as weapons)
 + Flashlight (Seconhand equip : Can be used alongside with weapons)
+
+### Weapon item states
+
++ UWeaponState
++ UWeaponState_Firing
++ UWeaponState_Reloading
++ UWeaponState_Equipping
++ UWeaponState_UnEquipping
++ UWeaponState_Idle
+
+#### Statemachine
+
+UBaseWeaponItem
++ TArray<TSubclassOf<UWeaponState>> States
++ ChangeState(TSubclassOf<UWeaponState> NewState, TSubclassOf<UWeaponState> PrevState)
+	
+	
+	
+	
+	
+	
+	
+	

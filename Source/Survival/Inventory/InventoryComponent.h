@@ -119,8 +119,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Inventory Events")
 	FItemSlotAddedSignature OnItemSlotAddedDelegate;
 
+
 	///////////////////////////////////////////////////////////////
 	// Inventory handling
+
 
 	// Adds a regular item to the inventory or to the stack of a similar item
 	bool AddItem(const FName &ItemID, int32 NewStackSize, EItemType ItemType, TSubclassOf<class UBaseItem> ItemTypeClass);
@@ -132,10 +134,8 @@ public:
 	// Equips an item
 	void EquipItem(int32 Slot, class ASurvivalCharacter *Target);
 
-	// Tries to find a specific ammo type in the inventory. Useful for live-reload
-	int32 FindAmmoItemInSlot(EAmmoType AmmoType);
-
-	bool ReloadEquippedWeapon();
+	// UnEquips the equipped item, if any
+	void UnEquipItem();
 
 	// Drop an item or the stacksize of an item
 	bool DropItem(int32 Slot, int32 StackSize);
@@ -146,7 +146,16 @@ public:
 	// Swap places in the inventory
 	bool SwapSlot(int32 SlotA, int32 SlotB);
 
-	void HandleItemUsed(FItemSlotInfo &UsedItemSlot, bool WasUsed);
+	// Reloads the equipped weapon
+	bool ReloadEquippedWeapon();
+
+
+	///////////////////////////////////////////////////////////////
+	// Inventory utilities to make our lives easier.. 
+
+
+	// Tries to find a specific ammo type in the inventory. Useful for live-reload
+	int32 FindAmmoItemInSlot(EAmmoType AmmoType);
 
 	// Utility to set a new info in a slot. Important step includes closing the slot index, which is vital
 	FORCEINLINE void SetInSlot(const FItemSlotInfo &SlotInfo)
@@ -183,6 +192,7 @@ public:
 		});
 	}
 
+	// Utility to get the ItemSlotInfo in Slot. Returns nullptr if not valid; safe to call.
 	FORCEINLINE FItemSlotInfo *GetItemInSlot(int32 Slot)
 	{
 		int32 index = GetItemInfoIndexAtSlot(Slot);
@@ -194,9 +204,20 @@ public:
 
 	}
 
+	// Utility to definitively check if a slotinfo is valid or not
 	FORCEINLINE bool IsValidSlotInfo(const FItemSlotInfo &SlotInfo)
 	{
 		return SlotInfo.SlotIndex != INDEX_NONE;
+	}
+
+	// Utility to thouroughly check if an itemslot is valid. Checks underlying UBaseItem reference class
+	FORCEINLINE bool IsSlotValidLowLevel(const FItemSlotInfo &SlotInfo)
+	{
+		if (SlotInfo.StackSize == 0 || SlotInfo.ItemTypeReference == NULL || !SlotInfo.ItemTypeReference->IsValidLowLevel())
+		{
+			return false;
+		}
+		return true;
 	}
 
 	// Utility to check if the slotindex is open
@@ -235,9 +256,9 @@ public:
 	FORCEINLINE void PrintInventory()
 	{
 		for (int i = 0; i < Items.Num(); i++)
-		{
+		{/*
 			UE_LOG(SurvivalDebugLog, Error, TEXT("Item: ['%s'] in slot ['%d']"),
-				*Items[i].ItemID.ToString(), Items[i].SlotIndex);
+				*Items[i].ItemID.ToString(), Items[i].SlotIndex);*/
 		}
 	}
 

@@ -31,6 +31,22 @@ enum class EWeaponType : uint8
 };
 
 /**
+*
+*/
+UENUM(BlueprintType)
+enum class EWeaponState : uint8
+{
+	WS_Invalid			UMETA(DisplayName = "Invalid State"),
+	WS_Inactive			UMETA(DisplayName = "Inactive State"),
+	WS_Idle				UMETA(DisplayName = "Idle State"),
+	WS_Equipping		UMETA(DisplayName = "Equipping State"),
+	WS_UnEquipping		UMETA(DisplayName = "Unequipping State"),
+	WS_Firing			UMETA(DisplayName = "Firing State"),
+	WS_Reloading		UMETA(DisplayName = "Reloading State"),
+	WS_AmmoEmpty		UMETA(DisplayName = "Ammo Empty State")
+};
+
+/**
  * 
  */
 UCLASS(Blueprintable, BlueprintType)

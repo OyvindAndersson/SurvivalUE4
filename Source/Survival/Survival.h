@@ -4,6 +4,9 @@
 #define __SURVIVAL_H__
 
 #include "EngineMinimal.h"
+#include "SurvivalCharacter.h"
+#include "Inventory/BaseItem.h"
+#include "Inventory/BaseWeaponItem.h"
 
 #define IN_DEVMODE 1
 

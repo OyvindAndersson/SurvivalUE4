@@ -39,6 +39,7 @@ public:
 
 	virtual void Tick(float Delta) override;
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent *InventoryComponent;
 
@@ -125,12 +126,6 @@ protected:
 
 	/** Opens the inventory UI */
 	void OnShowInventory();
-
-	void OnStartReload();
-	void OnEndReload();
-	bool bIsReloading;
-	float ReloadTime;
-	float ReloadTimeAccum;
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);

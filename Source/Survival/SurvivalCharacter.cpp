@@ -5,10 +5,7 @@
 #include "SurvivalProjectile.h"
 #include "SurvivalGameMode.h"
 #include "Inventory/InventorySystemManager.h"
-#include "Inventory/BaseItem.h"
 #include "Inventory/Items/BaseHealingItem.h"
-#include "Inventory/BaseWeaponItem.h"
-#include "Inventory/ProjectileWeapon.h"
 
 #include "Inventory/ItemWorldActor.h"
 #include "Utility/UtilityFunctionsLibrary.h"
@@ -68,10 +65,6 @@ ASurvivalCharacter::ASurvivalCharacter()
 	MaxHealth = 100.0f;
 	Stamina = 100.0f;
 
-	bIsReloading = false;
-	ReloadTime = 2.0f;
-	ReloadTimeAccum = 0.0f;
-
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
 
@@ -94,15 +87,6 @@ void ASurvivalCharacter::BeginPlay()
 void ASurvivalCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bIsReloading)
-	{
-		ReloadTimeAccum += DeltaTime;
-		if (ReloadTimeAccum >= ReloadTime)
-		{
-			OnEndReload();
-		}
-	}
 }
 
 float ASurvivalCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)
@@ -151,7 +135,7 @@ void ASurvivalCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASurvivalCharacter::OnFire);
 	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ASurvivalCharacter::OnAction);
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASurvivalCharacter::OnStartReload);
+	//PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASurvivalCharacter::OnStartReload);
 	PlayerInputComponent->BindAction("ShowInventory", IE_Pressed, this, &ASurvivalCharacter::OnShowInventory);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASurvivalCharacter::MoveForward);
@@ -168,29 +152,7 @@ void ASurvivalCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ASurvivalCharacter::OnFire()
 {
-	if (bIsReloading)
-	{
-		UE_LOG(SurvivalDebugLog, Log, TEXT("Weapon is reloading. Cant fire yet..."));
-		return;
-	}
 
-	if (InventoryComponent && InventoryComponent->EquippedWeapon && InventoryComponent->EquippedWeapon->IsValidLowLevel())
-	{
-		if (InventoryComponent->EquippedWeapon->ClipSize > 0)
-		{
-			InventoryComponent->EquippedWeapon->ClipSize--; // shot fired
-		}
-		else
-		{
-			UE_LOG(SurvivalDebugLog, Log, TEXT("OnFire : Out of ammo!"));
-			return;
-		}
-	}
-	else
-	{
-		UE_LOG(SurvivalDebugLog, Log, TEXT("OnFire : No weapon equipped! Cannot fire.."));
-		return;
-	}
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
@@ -285,20 +247,6 @@ void ASurvivalCharacter::OnAction()
 void ASurvivalCharacter::OnShowInventory()
 {
 	
-}
-
-void ASurvivalCharacter::OnStartReload()
-{
-	InventoryComponent->PrintInventory();
-	bIsReloading = InventoryComponent->ReloadEquippedWeapon();
-	UE_LOG(SurvivalDebugLog, Error, TEXT("RELOAD START"));
-}
-
-void ASurvivalCharacter::OnEndReload()
-{
-	bIsReloading = false;
-	UE_LOG(SurvivalDebugLog, Error, TEXT("RELOAD END"));
-	ReloadTimeAccum = 0.0f;
 }
 
 void ASurvivalCharacter::MoveForward(float Value)
@@ -499,6 +447,7 @@ void ASurvivalCharacter::Equip(int32 Slot)
 	if (InventoryComponent)
 	{
 		InventoryComponent->EquipItem(Slot, this);
+		
 	}
 	else
 	{
@@ -513,7 +462,7 @@ void ASurvivalCharacter::UnEquip()
 		FP_Gun->SetSkeletalMesh(NULL);
 		if (InventoryComponent)
 		{
-			InventoryComponent->EquippedWeapon = nullptr;
+			InventoryComponent->UnEquipItem();
 		}
 	}
 }
