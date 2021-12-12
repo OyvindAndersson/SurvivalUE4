@@ -1,5 +1,10 @@
 # Survival UE4 Project
 
+##! NOTE !: 
+**This is an old learning project that never finished properly, kept for nostalgic purposes. 
+I cannot guarantee it all works now as described, but most of the inventory stuff
+should be working afaik.**
+
 Singleplayer puzzle/adventure/horror game relying heavily upon item interaction and problemsolving.
 
 ## Inventory System
